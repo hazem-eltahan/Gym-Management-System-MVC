@@ -18,5 +18,7 @@ namespace GymSys.DAL.DbContexts
             modelBuilder.ApplyConfiguration<Plan>(new PlanConfiguration());
         }
         public DbSet<Plan> Plans { get; set; }
+        public DbSet<Member> Members { get; set; }
+        public DbSet<Trainer> Trainers { get; set; }
     }
 }
