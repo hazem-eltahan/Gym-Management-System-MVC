@@ -1,5 +1,4 @@
-﻿using GymSys.DAL.Configurations;
-using GymSys.DAL.Data.Models;
+﻿using GymSys.DAL.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 

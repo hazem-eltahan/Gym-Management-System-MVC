@@ -1,8 +1,5 @@
-﻿using GymSys.DAL.DbContexts;
-using GymSys.DAL.Repositories.Classes;
-using GymSys.DAL.Repositories.Interfaces;
+﻿using GymSys.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GymSys.PL.Controllers
 {
