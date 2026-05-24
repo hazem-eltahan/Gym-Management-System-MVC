@@ -1,4 +1,4 @@
-﻿using GymSys.DAL.Models.Enums;
+﻿using GymSys.DAL.Data.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GymSys.DAL.Models
+namespace GymSys.DAL.Data.Models
 {
     public abstract class GymUser : BaseEntity
     {

@@ -1,4 +1,4 @@
-﻿using GymSys.DAL.Models;
+﻿using GymSys.DAL.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -7,14 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GymSys.DAL.Configurations
+namespace GymSys.DAL.Data.Configurations
 {
-    public class MemberConfiguration : GymUserConfiguration<Member>, IEntityTypeConfiguration<Member>
+    public class TrainerConfiguration : GymUserConfiguration<Trainer>, IEntityTypeConfiguration<Trainer>
     {
-        public new void Configure(EntityTypeBuilder<Member> builder)
+        public new void Configure(EntityTypeBuilder<Trainer> builder)
         {
             builder.Property(x => x.CreatedAt)
-                .HasColumnName("JoinDate")
+                .HasColumnName("HireDate")
                 .HasDefaultValueSql("GETDATE()");
 
             base.Configure(builder);

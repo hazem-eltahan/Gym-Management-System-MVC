@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GymSys.DAL.Models
+namespace GymSys.DAL.Data.Models
 {
     public class HealthRecord : BaseEntity
     {
@@ -14,5 +14,10 @@ namespace GymSys.DAL.Models
         public string? Note { get; set; }
 
         //LastUpdate = UpdatedAt in BaseEntity
+
+        #region Relationship
+        public Member Member { get; set; } = default!;
+        public int MemberId { get; set; }
+        #endregion
     }
 }

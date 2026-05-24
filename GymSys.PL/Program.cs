@@ -1,5 +1,5 @@
 using GymSys.DAL;
-using GymSys.DAL.DbContexts;
+using GymSys.DAL.Data.DbContexts;
 using GymSys.DAL.Repositories.Classes;
 using GymSys.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;

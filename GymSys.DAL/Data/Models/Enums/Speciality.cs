@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GymSys.DAL.Models.Enums
+namespace GymSys.DAL.Data.Models.Enums
 {
     public enum Speciality
     {
