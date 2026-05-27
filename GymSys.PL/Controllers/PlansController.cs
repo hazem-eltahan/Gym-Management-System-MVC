@@ -1,25 +1,26 @@
-﻿using GymSys.DAL.Repositories.Interfaces;
+﻿using GymSys.DAL.Data.Models;
+using GymSys.DAL.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymSys.PL.Controllers
 {
     public class PlansController : Controller
     {
-        private readonly IPlanRepository planRepository;
+        private readonly IGenericRepository<Plan> _planRepository;
 
-        public PlansController(IPlanRepository planRepository)
+        public PlansController(IGenericRepository<Plan> planRepository)
         {
-            this.planRepository = planRepository;
+            _planRepository = planRepository;
         }
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var plans = await planRepository.GetAllAsync(ct: ct);
+            var plans = await _planRepository.GetAllAsync(ct: ct);
             return View(plans);
         }
 
         public async Task<IActionResult> Details(int id, CancellationToken ct)
         {
-            var plan = await planRepository.GetByIdAsync(id, ct);
+            var plan = await _planRepository.GetByIdAsync(id, ct);
             if (plan is null)
                 return RedirectToAction(nameof(Index));
             return View(plan);

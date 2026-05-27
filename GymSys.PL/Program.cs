@@ -14,13 +14,12 @@ namespace GymSys.PL
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddScoped<IPlanRepository, PlanRepository>();
-            builder.Services.AddScoped<IMemberRepository, MemberRepository>();
-            builder.Services.AddScoped<ITrainerRepository, TrainerRepository>();
             builder.Services.AddDbContext<GymDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             var app = builder.Build();
 
