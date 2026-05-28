@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +24,11 @@ namespace GymSys.DAL.Repositories.Classes
         {
             _dbSet.Add(entity);
             return await _dbContext.SaveChangesAsync(ct);
+        }
+
+        public Task<bool> AllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default)
+        {
+            return _dbSet.AsNoTracking().AnyAsync(predicate, ct);
         }
 
         public async Task<int> DeleteAsync(TEntity entity, CancellationToken ct = default)

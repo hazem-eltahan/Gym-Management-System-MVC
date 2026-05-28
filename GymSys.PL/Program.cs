@@ -1,3 +1,5 @@
+using GymSys.BLL.Services.Classes;
+using GymSys.BLL.Services.Interfaces;
 using GymSys.DAL;
 using GymSys.DAL.Data.DbContexts;
 using GymSys.DAL.Repositories.Classes;
@@ -20,6 +22,8 @@ namespace GymSys.PL
             });
 
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+            builder.Services.AddScoped<IMemberService, MemberService>();
 
             var app = builder.Build();
 
