@@ -26,7 +26,7 @@ namespace GymSys.DAL.Repositories.Classes
             return await _dbContext.SaveChangesAsync(ct);
         }
 
-        public Task<bool> AllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default)
+        public Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default)
         {
             return _dbSet.AsNoTracking().AnyAsync(predicate, ct);
         }

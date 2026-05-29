@@ -22,8 +22,8 @@ namespace GymSys.BLL.Services.Classes
 
         public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
         {
-            var emailExist = await _memberRepository.AllAsync(x => x.Email == model.Email, ct);
-            var phoneExist = await _memberRepository.AllAsync(x => x.Phone == model.Phone, ct);
+            var emailExist = await _memberRepository.AnyAsync(x => x.Email == model.Email, ct);
+            var phoneExist = await _memberRepository.AnyAsync(x => x.Phone == model.Phone, ct);
 
             if (emailExist || phoneExist) return false;
 
