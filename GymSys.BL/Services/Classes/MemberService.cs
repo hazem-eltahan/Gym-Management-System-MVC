@@ -14,10 +14,16 @@ namespace GymSys.BLL.Services.Classes
     public class MemberService : IMemberService
     {
         private readonly IGenericRepository<Member> _memberRepository;
+        private readonly IGenericRepository<Membership> _membershipRepository;
+        private readonly IGenericRepository<Plan> _planRepository;
 
-        public MemberService(IGenericRepository<Member> memberRepository)
+        public MemberService(IGenericRepository<Member> memberRepository, 
+            IGenericRepository<Membership> membershipRepository,
+            IGenericRepository<Plan> planRepository)
         {
             _memberRepository = memberRepository;
+            _membershipRepository = membershipRepository;
+            _planRepository = planRepository;
         }
 
         public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
@@ -67,6 +73,33 @@ namespace GymSys.BLL.Services.Classes
                 Phone = m.Phone
             });
             return membersVM;
+        }
+
+        public async Task<MemberDetailsViewModel?> GetMemberDetailsByIdAsync(int id, CancellationToken ct = default)
+        {
+            var member = await _memberRepository.GetByIdAsync(id, ct);
+            if (member == null) return null;
+
+            var memberDetailsVM = new MemberDetailsViewModel()
+            {
+                Name = member.Name,
+                Photo = member.Photo,
+                Email = member.Email,
+                Gender = member.Gender.ToString(),
+                Phone = member.Phone,
+                DateOfBirth = member.DateOfBirth.ToShortDateString(),
+                Address = $"{member.Address.BuildingNumber} - {member.Address.Street} - {member.Address.City}"
+            };
+
+            var activeMembership = await _membershipRepository.FirstOrDefaultAsync(x=>x.MemberId == id && x.EndDate > DateTime.Now);
+            if (activeMembership is not null)
+            {
+                var activePlan = await _planRepository.GetByIdAsync(activeMembership.PlanId, ct);
+                memberDetailsVM.PlanName = activePlan.Name;
+                memberDetailsVM.MembershipStartDate = activeMembership.CreatedAt.ToString();
+                memberDetailsVM.MembershipStartDate = activeMembership.EndDate.ToString();
+            }
+            return memberDetailsVM;
         }
     }
 }

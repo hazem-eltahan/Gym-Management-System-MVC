@@ -1,6 +1,10 @@
 ﻿@using GymSys.DAL.Data.Models
 @model IEnumerable<Plan>
 
+@{
+	ViewData["Title"] = "Plans";
+}
+
 @if (TempData["SuccessMessage"] is not null)
 {
 	<div id="Alert" class="alert alert-success alert-dismissible fade show">

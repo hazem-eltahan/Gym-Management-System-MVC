@@ -25,13 +25,19 @@ namespace GymSys.PL.Controllers
             return View(members);
         }
 
-        ////MemberDetails(int id) - Displays member profile page
-        //public async Task<IActionResult> MemberDetails(int id, CancellationToken ct)
-        //{
-        //    var member = await _membersRepository.GetByIdAsync(id, ct);
+        //MemberDetails(int id) - Displays member profile page
+        public async Task<IActionResult> MemberDetails(int id, CancellationToken ct)
+        {
+            var member = await _memberService.GetMemberDetailsByIdAsync(id, ct);
 
-        //    return View(member);
-        //}
+            if (member == null)
+            {
+                TempData["FailMessage"] = "Member not found!";
+                RedirectToAction(nameof(Index));
+            }
+
+            return View(member);
+        }
         ////HealthRecordDetails(int id) - Shows health record page
         //public async Task<IActionResult> HealthRecordDetails(int id, CancellationToken ct)
         //{
@@ -51,7 +57,14 @@ namespace GymSys.PL.Controllers
         public async Task<IActionResult> CreateMember(CreateMemberViewModel model, CancellationToken ct)
         {
             if (!ModelState.IsValid) return View(nameof(Create), model);
+
             var result = await _memberService.CreateMemberAsync(model, ct);
+
+            if (result)
+                TempData["SuccessMessage"] = "Member created successfully!";
+            else
+                TempData["FailMessage"] = "Failed to create member!";
+
             return RedirectToAction(nameof(Index));
         }
         #endregion
