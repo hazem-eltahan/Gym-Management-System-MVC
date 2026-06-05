@@ -16,14 +16,17 @@ namespace GymSys.BLL.Services.Classes
         private readonly IGenericRepository<Member> _memberRepository;
         private readonly IGenericRepository<Membership> _membershipRepository;
         private readonly IGenericRepository<Plan> _planRepository;
+        private readonly IGenericRepository<HealthRecord> _healthRecordRepository;
 
         public MemberService(IGenericRepository<Member> memberRepository, 
             IGenericRepository<Membership> membershipRepository,
-            IGenericRepository<Plan> planRepository)
+            IGenericRepository<Plan> planRepository,
+            IGenericRepository<HealthRecord> healthRecordRepository)
         {
             _memberRepository = memberRepository;
             _membershipRepository = membershipRepository;
             _planRepository = planRepository;
+            _healthRecordRepository = healthRecordRepository;
         }
 
         public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
@@ -75,6 +78,21 @@ namespace GymSys.BLL.Services.Classes
             return membersVM;
         }
 
+        public async Task<HealthRecordViewModel?> GetHealthRecordByIdAsync(int id, CancellationToken ct = default)
+        {
+            var healthRecord = await _healthRecordRepository.GetByIdAsync(id, ct);
+            if (healthRecord == null) return null;
+
+            var healthRecordVM = new HealthRecordViewModel()
+            {
+                Weight = healthRecord.Weight,
+                Height = healthRecord.Height,
+                Note = healthRecord.Note,
+                BloodType = healthRecord.BloodType
+            };
+            return healthRecordVM;
+        }
+
         public async Task<MemberDetailsViewModel?> GetMemberDetailsByIdAsync(int id, CancellationToken ct = default)
         {
             var member = await _memberRepository.GetByIdAsync(id, ct);
@@ -97,7 +115,7 @@ namespace GymSys.BLL.Services.Classes
                 var activePlan = await _planRepository.GetByIdAsync(activeMembership.PlanId, ct);
                 memberDetailsVM.PlanName = activePlan.Name;
                 memberDetailsVM.MembershipStartDate = activeMembership.CreatedAt.ToString();
-                memberDetailsVM.MembershipStartDate = activeMembership.EndDate.ToString();
+                memberDetailsVM.MembershipEndDate = activeMembership.EndDate.ToString();
             }
             return memberDetailsVM;
         }

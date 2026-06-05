@@ -30,21 +30,26 @@ namespace GymSys.PL.Controllers
         {
             var member = await _memberService.GetMemberDetailsByIdAsync(id, ct);
 
-            if (member == null)
+            if (member is null)
             {
                 TempData["FailMessage"] = "Member not found!";
-                RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
             }
 
             return View(member);
         }
-        ////HealthRecordDetails(int id) - Shows health record page
-        //public async Task<IActionResult> HealthRecordDetails(int id, CancellationToken ct)
-        //{
-        //    var healthRecordDetails = await _membersRepository.GetByIdAsync(id, ct);
+        //HealthRecordDetails(int id) - Shows health record page
+        public async Task<IActionResult> HealthRecordDetails(int id, CancellationToken ct)
+        {
+            var healthRecordDetails = await _memberService.GetHealthRecordByIdAsync(id, ct);
 
-        //    return View(member);
-        //}
+            if(healthRecordDetails == null)
+            {
+                TempData["FailMessage"] = "Health Record not found!";
+                return RedirectToAction(nameof(Index));
+            }
+            return View(healthRecordDetails);
+        }
 
         #region Create
         //Create() - Shows member registration form
