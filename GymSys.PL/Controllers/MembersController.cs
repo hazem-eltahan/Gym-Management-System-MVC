@@ -43,7 +43,7 @@ namespace GymSys.PL.Controllers
         {
             var healthRecordDetails = await _memberService.GetMemberHealthRecordAsync(id, ct);
 
-            if(healthRecordDetails == null)
+            if (healthRecordDetails == null)
             {
                 TempData["FailMessage"] = "Health Record not found!";
                 return RedirectToAction(nameof(Index));
@@ -75,8 +75,33 @@ namespace GymSys.PL.Controllers
         #endregion
 
         #region Edit
-        //MemberEdit(int id) - Displays edit form
-        //MemberEdit() - Processes update 
+        //GET Edit(id) - Displays edit form
+        [HttpGet]
+        public async Task<IActionResult> EditMember(int id, CancellationToken ct)
+        {
+            var member = await _memberService.GetMemberToUpdateAsync(id, ct);
+            if(member == null)
+            {
+                TempData["FailMessage"] = "Member not found!";
+                return RedirectToAction(nameof(Index));
+            }
+            return View(member);
+        }
+
+        //POST Edit(member) - Submits form
+        [HttpPost]
+        public async Task<IActionResult> EditMember([FromRoute]int id, MemberToUpdateViewModel model, CancellationToken ct)
+        {
+            if(!ModelState.IsValid) return View(model);
+
+            var result = await _memberService.UpdateMemberDetailsAsync(id, model, ct);
+            if (result)
+                TempData["SuccessMessage"] = "Member updated successfully!";
+            else
+                TempData["FailMessage"] = "Failed to update member!";
+
+            return RedirectToAction(nameof(Index));
+        }
         #endregion
 
         #region Delete

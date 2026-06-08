@@ -119,5 +119,44 @@ namespace GymSys.BLL.Services.Classes
             }
             return memberDetailsVM;
         }
+
+        public async Task<MemberToUpdateViewModel?> GetMemberToUpdateAsync(int id, CancellationToken ct = default)
+        {
+            var member = await _memberRepository.GetByIdAsync(id, ct);
+            if (member == null) return null;
+
+            var memberToUpdateVM = new MemberToUpdateViewModel()
+            {
+                Name = member.Name,
+                Photo = member.Photo,
+                Email = member.Email,
+                Phone = member.Phone,
+                BuildingNumber = member.Address.BuildingNumber,
+                City = member.Address.City,
+                Street = member.Address.Street,
+            };
+            return memberToUpdateVM;
+        }
+
+        public async Task<bool> UpdateMemberDetailsAsync(int id, MemberToUpdateViewModel model, CancellationToken ct = default)
+        {
+            var member =await _memberRepository.GetByIdAsync(id,ct);
+            if (member == null) return false;
+
+            var emailExist = await _memberRepository.AnyAsync(e=>e.Email == model.Email && e.Id != id);
+            var phoneExist = await _memberRepository.AnyAsync(e=>e.Phone == model.Phone && e.Id != id);
+
+            if(emailExist || phoneExist) return false;
+
+            member.Email = model.Email;
+            member.Phone = model.Phone;
+            member.Address.BuildingNumber = model.BuildingNumber;
+            member.Address.City = model.City;
+            member.Address.Street = model.Street;
+            member.UpdatedAt = DateTime.Now;
+
+            var result = await _memberRepository.UpdateAsync(member, ct);
+            return result > 0;
+        }
     }
 }
