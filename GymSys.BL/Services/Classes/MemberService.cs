@@ -18,7 +18,7 @@ namespace GymSys.BLL.Services.Classes
         private readonly IGenericRepository<Plan> _planRepository;
         private readonly IGenericRepository<HealthRecord> _healthRecordRepository;
 
-        public MemberService(IGenericRepository<Member> memberRepository, 
+        public MemberService(IGenericRepository<Member> memberRepository,
             IGenericRepository<Membership> membershipRepository,
             IGenericRepository<Plan> planRepository,
             IGenericRepository<HealthRecord> healthRecordRepository)
@@ -78,9 +78,9 @@ namespace GymSys.BLL.Services.Classes
             return membersVM;
         }
 
-        public async Task<HealthRecordViewModel?> GetHealthRecordByIdAsync(int id, CancellationToken ct = default)
+        public async Task<HealthRecordViewModel?> GetMemberHealthRecordAsync(int id, CancellationToken ct = default)
         {
-            var healthRecord = await _healthRecordRepository.GetByIdAsync(id, ct);
+            var healthRecord = await _healthRecordRepository.FirstOrDefaultAsync(x => x.Id == id, ct: ct);
             if (healthRecord == null) return null;
 
             var healthRecordVM = new HealthRecordViewModel()
@@ -109,7 +109,7 @@ namespace GymSys.BLL.Services.Classes
                 Address = $"{member.Address.BuildingNumber} - {member.Address.Street} - {member.Address.City}"
             };
 
-            var activeMembership = await _membershipRepository.FirstOrDefaultAsync(x=>x.MemberId == id && x.EndDate > DateTime.Now);
+            var activeMembership = await _membershipRepository.FirstOrDefaultAsync(x => x.MemberId == id && x.EndDate > DateTime.Now);
             if (activeMembership is not null)
             {
                 var activePlan = await _planRepository.GetByIdAsync(activeMembership.PlanId, ct);

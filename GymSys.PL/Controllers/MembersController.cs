@@ -41,7 +41,7 @@ namespace GymSys.PL.Controllers
         //HealthRecordDetails(int id) - Shows health record page
         public async Task<IActionResult> HealthRecordDetails(int id, CancellationToken ct)
         {
-            var healthRecordDetails = await _memberService.GetHealthRecordByIdAsync(id, ct);
+            var healthRecordDetails = await _memberService.GetMemberHealthRecordAsync(id, ct);
 
             if(healthRecordDetails == null)
             {

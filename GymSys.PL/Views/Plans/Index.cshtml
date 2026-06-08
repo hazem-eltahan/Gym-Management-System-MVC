@@ -1,5 +1,5 @@
 ﻿@using GymSys.DAL.Data.Models
-@model IEnumerable<Plan>
+@model IEnumerable<PlanViewModel>
 
 @{
 	ViewData["Title"] = "Plans";
@@ -50,7 +50,7 @@
 							<div class="mb-3">
 								<p class="text-muted mb-2">
 									<i class="bi bi-calendar-check text-primary-color me-2"></i>
-									<strong>Duration:</strong> @plan.DurationDays Days
+									<strong>Duration:</strong> @plan.Duration Days
 								</p>
 								<p class="text-muted mb-3">
 									<i class="bi bi-file-text text-primary-color me-2"></i>
