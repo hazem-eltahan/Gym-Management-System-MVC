@@ -34,5 +34,21 @@ namespace GymSys.BLL.Services.Classes
             });
             return planViewModel;
         }
+
+        public async Task<PlanViewModel?> GetPlanDetailsByIdAsync(int id, CancellationToken ct)
+        {
+            var plan = await _planRepository.GetByIdAsync(id, ct);
+            if (plan == null) return null;
+
+            var planVM = new PlanViewModel()
+            {
+                Name = plan.Name,
+                Price = plan.Price,
+                Duration = plan.DurationDays,
+                Description = plan.Description,
+                IsActive = plan.IsActive
+            };
+            return planVM;
+        }
     }
 }

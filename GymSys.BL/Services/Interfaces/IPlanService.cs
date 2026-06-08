@@ -10,5 +10,6 @@ namespace GymSys.BLL.Services.Interfaces
     public interface IPlanService
     {
         Task<IEnumerable<PlanViewModel>> GetAllPlansAsync(CancellationToken ct);
+        Task<PlanViewModel?> GetPlanDetailsByIdAsync(int id, CancellationToken ct);
     }
 }

@@ -19,12 +19,12 @@ namespace GymSys.PL.Controllers
             return View(plans);
         }
 
-        //public async Task<IActionResult> Details(int id, CancellationToken ct)
-        //{
-        //    var plan = await _planService.GetByIdAsync(id, ct);
-        //    if (plan is null)
-        //        return RedirectToAction(nameof(Index));
-        //    return View(plan);
-        //}
+        public async Task<IActionResult> Details(int id, CancellationToken ct)
+        {
+            var plan = await _planService.GetPlanDetailsByIdAsync(id, ct);
+            if (plan is null)
+                return RedirectToAction(nameof(Index));
+            return View(plan);
+        }
     }
 }
