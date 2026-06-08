@@ -15,15 +15,18 @@ namespace GymSys.PL.Controllers
         }
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var plans = await _planService.GetAllPlansAsync(ct: ct);
+            var plans = await _planService.GetAllPlansAsync(ct);
             return View(plans);
         }
-
+        [HttpGet]
         public async Task<IActionResult> Details(int id, CancellationToken ct)
         {
             var plan = await _planService.GetPlanDetailsByIdAsync(id, ct);
             if (plan is null)
+            {
+                TempData["FailMessage"] = "Plan not found!";
                 return RedirectToAction(nameof(Index));
+            }
             return View(plan);
         }
     }
