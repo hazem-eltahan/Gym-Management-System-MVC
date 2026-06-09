@@ -17,16 +17,19 @@ namespace GymSys.BLL.Services.Classes
         private readonly IGenericRepository<Membership> _membershipRepository;
         private readonly IGenericRepository<Plan> _planRepository;
         private readonly IGenericRepository<HealthRecord> _healthRecordRepository;
+        private readonly IGenericRepository<Booking> _bookingRepository;
 
         public MemberService(IGenericRepository<Member> memberRepository,
             IGenericRepository<Membership> membershipRepository,
             IGenericRepository<Plan> planRepository,
-            IGenericRepository<HealthRecord> healthRecordRepository)
+            IGenericRepository<HealthRecord> healthRecordRepository,
+            IGenericRepository<Booking> bookingRepository)
         {
             _memberRepository = memberRepository;
             _membershipRepository = membershipRepository;
             _planRepository = planRepository;
             _healthRecordRepository = healthRecordRepository;
+            _bookingRepository = bookingRepository;
         }
 
         public async Task<bool> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
@@ -156,6 +159,18 @@ namespace GymSys.BLL.Services.Classes
             member.UpdatedAt = DateTime.Now;
 
             var result = await _memberRepository.UpdateAsync(member, ct);
+            return result > 0;
+        }
+
+        public async Task<bool> DeleteMemberAsync(int id, CancellationToken ct = default)
+        {
+            var member = await _memberRepository.GetByIdAsync(id, ct);
+            if (member == null) return false;
+
+            var existingBooking = await _bookingRepository.AnyAsync(b=>b.MemberId == id && b.Session.StartDate > DateTime.Now, ct);
+            if(existingBooking) return false;
+
+            var result = await _memberRepository.DeleteAsync(member, ct);
             return result > 0;
         }
     }

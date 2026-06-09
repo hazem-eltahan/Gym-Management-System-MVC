@@ -80,7 +80,7 @@ namespace GymSys.PL.Controllers
         public async Task<IActionResult> EditMember(int id, CancellationToken ct)
         {
             var member = await _memberService.GetMemberToUpdateAsync(id, ct);
-            if(member == null)
+            if (member == null)
             {
                 TempData["FailMessage"] = "Member not found!";
                 return RedirectToAction(nameof(Index));
@@ -90,9 +90,9 @@ namespace GymSys.PL.Controllers
 
         //POST Edit(member) - Submits form
         [HttpPost]
-        public async Task<IActionResult> EditMember([FromRoute]int id, MemberToUpdateViewModel model, CancellationToken ct)
+        public async Task<IActionResult> EditMember([FromRoute] int id, MemberToUpdateViewModel model, CancellationToken ct)
         {
-            if(!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) return View(model);
 
             var result = await _memberService.UpdateMemberDetailsAsync(id, model, ct);
             if (result)
@@ -105,8 +105,31 @@ namespace GymSys.PL.Controllers
         #endregion
 
         #region Delete
-        //Delete(int id) - Shows deletion confirmation page
-        //DeleteConfirmed(int id) - Processes deletion 
+        //GET Delete(int id) - Shows deletion confirmation page
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id, CancellationToken ct)
+        {
+            var member = await _memberService.GetMemberDetailsByIdAsync(id, ct);
+            if(member == null)
+            {
+                TempData["FailMessage"] = "Member not found!";
+                return RedirectToAction(nameof(Index));
+            }
+            return View();
+        }
+
+        //POST DeleteConfirmed(int id) - Processes deletion 
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirmed([FromRoute]int id, CancellationToken ct)
+        {
+            var result = await _memberService.DeleteMemberAsync(id, ct);
+
+            if (result)
+                TempData["SuccessMessage"] = "Member deleted successfully!";
+            else
+                TempData["FailMessage"] = "Failed to delete member!";
+            return RedirectToAction(nameof(Index));
+        }
         #endregion
     }
 }
