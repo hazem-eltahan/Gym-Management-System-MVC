@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GymSys.BLL.ViewModels.MemberViewModels
+namespace GymSys.BLL.ViewModels.PlanViewModels
 {
     public class PlanViewModel
     {

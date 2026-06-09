@@ -1,4 +1,4 @@
-﻿using GymSys.BLL.ViewModels.MemberViewModels;
+﻿using GymSys.BLL.ViewModels.PlanViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +11,8 @@ namespace GymSys.BLL.Services.Interfaces
     {
         Task<IEnumerable<PlanViewModel>> GetAllPlansAsync(CancellationToken ct = default);
         Task<PlanViewModel?> GetPlanDetailsByIdAsync(int id, CancellationToken ct = default);
+        Task<UpdatePlanViewModel?> GetPlanToUpdateAsync(int id, CancellationToken ct = default);
+        Task<bool> ToggleActivationAsync(int id, CancellationToken ct = default);
+        Task<bool> UpdatePlanAsync(int id, UpdatePlanViewModel model, CancellationToken ct = default);
     }
 }
