@@ -1,3 +1,11 @@
+using GymSys.BLL.Services.Classes;
+using GymSys.BLL.Services.Interfaces;
+using GymSys.DAL;
+using GymSys.DAL.Data.DbContexts;
+using GymSys.DAL.Repositories.Classes;
+using GymSys.DAL.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
 namespace GymSys.PL
 {
     public class Program
@@ -8,6 +16,19 @@ namespace GymSys.PL
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<GymDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+            builder.Services.AddScoped<IMemberService, MemberService>();
+            builder.Services.AddScoped<IPlanService, PlanService>();
+            builder.Services.AddScoped<ITrainerService, TrainerService>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+            builder.Services.AddScoped<ISessionService, SessionService>();
 
             var app = builder.Build();
 

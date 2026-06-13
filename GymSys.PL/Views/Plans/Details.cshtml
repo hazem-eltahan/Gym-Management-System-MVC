@@ -1,5 +1,8 @@
-﻿
-@model Plan
+﻿@model PlanViewModel
+
+@{
+    ViewData["Title"] = "Plan Details";
+}
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -24,7 +27,7 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-0 text-muted">Duration</h6>
-                                    <p class="mb-0 fw-bold">@Model.DurationDays days</p>
+                                    <p class="mb-0 fw-bold">@Model.Duration days</p>
                                 </div>
                             </div>
                         </div>
