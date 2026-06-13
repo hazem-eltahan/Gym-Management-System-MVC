@@ -1,3 +1,4 @@
+using GymSys.BLL;
 using GymSys.BLL.Services.Classes;
 using GymSys.BLL.Services.Interfaces;
 using GymSys.DAL;
@@ -29,6 +30,8 @@ namespace GymSys.PL
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ISessionRepository, SessionRepository>();
             builder.Services.AddScoped<ISessionService, SessionService>();
+
+            builder.Services.AddAutoMapper(m => m.AddProfile(new MappingProfile()));
 
             var app = builder.Build();
 
