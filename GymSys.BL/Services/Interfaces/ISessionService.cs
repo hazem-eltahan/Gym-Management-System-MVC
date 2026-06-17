@@ -1,4 +1,5 @@
-﻿using GymSys.BLL.Services.Classes;
+﻿using GymSys.BLL.Common;
+using GymSys.BLL.Services.Classes;
 using GymSys.BLL.ViewModels.SessionViewModels;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace GymSys.BLL.Services.Interfaces
     public interface ISessionService
     {
         Task<IEnumerable<SessionViewModel>?> GetAllSessionsAsync(CancellationToken ct = default);
-        Task<bool> CreateSessionAsync(CreateSessionViewModel model, CancellationToken ct = default);
+        Task<Result> CreateSessionAsync(CreateSessionViewModel model, CancellationToken ct = default);
         Task<IEnumerable<TrainerSelectList>> GetTrainerSelectListAsync(CancellationToken ct = default);
         Task<IEnumerable<CategorySelectList>> GetCategorySelectListAsync(CancellationToken ct = default);
     }

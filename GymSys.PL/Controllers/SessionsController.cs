@@ -24,28 +24,38 @@ namespace GymSys.PL.Controllers
         [HttpGet]
         public async Task<IActionResult> Create(CancellationToken ct)
         {
-            ViewBag.Trainers = new SelectList(await _sessionService.GetTrainerSelectListAsync(ct), "Id", "Name");
-            ViewBag.Categories = new SelectList(await _sessionService.GetCategorySelectListAsync(ct), "Id", "CategoryName");
+            await PopulateTrainerAndCategorySelectList();
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(CreateSessionViewModel model, CancellationToken ct)
         {
-            if (!ModelState.IsValid) return View(model);
-
+            if (!ModelState.IsValid)
+            {
+                await PopulateTrainerAndCategorySelectList();
+                return View(model);
+            }
             var result = await _sessionService.CreateSessionAsync(model, ct);
 
-            if (result)
+            if (result.success)
             {
                 TempData["SuccessMessage"] = "Session created successfully!";
+                return RedirectToAction(nameof(Index));
             }
             else
-                TempData["FailMessage"] = "Creating session failed!";
-
-            return RedirectToAction(nameof(Index));
-
+            {
+                TempData["FailMessage"] = result.error;
+                await PopulateTrainerAndCategorySelectList();
+                return View(model);
+            }
         }
         #endregion
+
+        public async Task PopulateTrainerAndCategorySelectList()
+        {
+            ViewBag.Trainers = new SelectList(await _sessionService.GetTrainerSelectListAsync(), "Id", "Name");
+            ViewBag.Categories = new SelectList(await _sessionService.GetCategorySelectListAsync(), "Id", "CategoryName");
+        }
     }
 }

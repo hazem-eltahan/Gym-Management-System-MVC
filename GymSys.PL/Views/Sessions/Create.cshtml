@@ -12,11 +12,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
-else if (TempData["ErrorMessage"] != null)
+else if (TempData["FailMessage"] != null)
 {
     <div id="Alert" class="alert alert-danger alert-dismissible fade show">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        @TempData["ErrorMessage"]
+        @TempData["FailMessage"]
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
@@ -119,6 +119,7 @@ else if (TempData["ErrorMessage"] != null)
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <partial name="_AlertBoxScript" />
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
