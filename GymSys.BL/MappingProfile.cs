@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GymSys.BLL.ViewModels.MemberViewModels;
+using GymSys.BLL.ViewModels.SessionViewModels;
 using GymSys.DAL.Data.Models;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,14 @@ namespace GymSys.BLL
     public class MappingProfile : Profile
     {
         public MappingProfile()
+        {
+            MapMember();
+
+            MapSession();
+
+        }
+        
+        private void MapMember()
         {
             CreateMap<Member, MemberViewModel>();
 
@@ -44,6 +53,14 @@ namespace GymSys.BLL
                     BuildingNumber = src.BuildingNumber
                 }))
                 .ForMember(dest => dest.HealthRecord, opt => opt.MapFrom(src => src.HealthRecordViewModel));
+        }
+
+        private void MapSession()
+        {
+            CreateMap<CreateSessionViewModel, Session>();
+
+            CreateMap<Trainer, TrainerSelectList>();
+            CreateMap<Category, CategorySelectList>();
         }
     }
 }
