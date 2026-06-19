@@ -26,17 +26,17 @@ namespace GymSys.BLL.Services.Classes
 
         public async Task<Result> CreateSessionAsync(CreateSessionViewModel model, CancellationToken ct = default)
         {
-            if(model.StartDate >= model.EndDate) return Result.Validation("End date must be after start date!");
-            if(model.StartDate <= DateTime.Now) return Result.Validation("Start date must be in the future!");
-            if(model.Capacity < 1 ||  model.Capacity > 25) return Result.Validation("Capacity has to be between 1 and 25!");
+            if (model.StartDate >= model.EndDate) return Result.Validation("End date must be after start date!");
+            if (model.StartDate <= DateTime.Now) return Result.Validation("Start date must be in the future!");
+            if (model.Capacity < 1 || model.Capacity > 25) return Result.Validation("Capacity has to be between 1 and 25!");
 
             var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(model.TrainerId);
-            if(trainer == null) return Result.NotFound("Trainer not found!");
+            if (trainer == null) return Result.NotFound("Trainer not found!");
 
             var category = await _unitOfWork.GetRepository<Category>().GetByIdAsync(model.CategoryId);
             if (category == null) return Result.NotFound("Category not found!");
 
-            var isValid = Enum.TryParse<Speciality>(category.CategoryName,true, out var speciality);
+            var isValid = Enum.TryParse<Speciality>(category.CategoryName, true, out var speciality);
             if (!isValid) return Result.Validation("Invalid category!");
 
             if (speciality != trainer.Speciality) return Result.Validation("Trainer does not have this speciality!");
@@ -73,7 +73,7 @@ namespace GymSys.BLL.Services.Classes
 
         public async Task<IEnumerable<CategorySelectList>> GetCategorySelectListAsync(CancellationToken ct = default)
         {
-            var categories = await _unitOfWork.GetRepository<Category>().GetAllAsync(ct:ct);
+            var categories = await _unitOfWork.GetRepository<Category>().GetAllAsync(ct: ct);
             return _mapper.Map<IEnumerable<CategorySelectList>>(categories);
         }
 
@@ -89,11 +89,64 @@ namespace GymSys.BLL.Services.Classes
                 return Result<SessionViewModel>.OK(sessionVM);
             }
         }
-
         public async Task<IEnumerable<TrainerSelectList>> GetTrainerSelectListAsync(CancellationToken ct = default)
         {
-            var trainers = await _unitOfWork.GetRepository<Trainer>().GetAllAsync(ct:ct);
+            var trainers = await _unitOfWork.GetRepository<Trainer>().GetAllAsync(ct: ct);
             return _mapper.Map<IEnumerable<TrainerSelectList>>(trainers);
+        }
+
+        public async Task<Result<UpdateSessionViewModel>> GetSessionToUpdateAsync(int id, CancellationToken ct = default)
+        {
+            var session = await _unitOfWork.SessionRepository.GetByIdAsync(id, ct);
+            if (session == null) return Result<UpdateSessionViewModel>.NotFound("Session not found!");
+
+            if (session.StartDate <= DateTime.Now)
+                return Result<UpdateSessionViewModel>.Fail("Can not update a session that has already started!");
+
+            var bookingCount = await _unitOfWork.SessionRepository.GetCountOfBookedSlotsAsync(id, ct);
+            if (bookingCount > 0)
+                return Result<UpdateSessionViewModel>.Fail("Can not update a session with booked slots!");
+
+            var sessionVM = _mapper.Map<Session, UpdateSessionViewModel>(session);
+            return Result<UpdateSessionViewModel>.OK(sessionVM);
+        }
+
+
+        public async Task<Result> UpdateSessionAsync(int id, UpdateSessionViewModel model, CancellationToken ct = default)
+        {
+            var session = await _unitOfWork.SessionRepository.GetByIdAsync(id, ct);
+            if (session == null) return Result.NotFound("Session not found!");
+
+            if (session.StartDate <= DateTime.Now)
+                return Result.Fail("Can not update a started session!");
+
+            if (model.EndDate <= model.StartDate)
+                return Result.Validation("End date must be after start date!");
+
+            var bookingCount = await _unitOfWork.SessionRepository.GetCountOfBookedSlotsAsync(id, ct);
+            if (bookingCount > 0)
+                return Result.Fail("Can not update a session with booked slots!");
+
+            if(model.StartDate <= DateTime.Now) 
+                return Result.Validation("Start date must be in the future!");
+
+            var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(model.TrainerId);
+            if (trainer == null) return Result.NotFound("Trainer not found!");
+
+            var category = await _unitOfWork.GetRepository<Category>().GetByIdAsync(session.CategoryId);
+            if (category == null) return Result.NotFound("Category not found!");
+
+            var isValid = Enum.TryParse<Speciality>(category.CategoryName, true, out var speciality);
+            if (!isValid) return Result.Validation("Invalid category!");
+
+            if (speciality != trainer.Speciality) return Result.Validation("Trainer does not have this speciality!");
+
+            _mapper.Map(model, session);
+            session.UpdatedAt = DateTime.Now;
+            _unitOfWork.SessionRepository.Update(session);
+
+            var result = await _unitOfWork.SaveChangesAsync(ct);
+            return result > 0 ? Result.OK() : Result.Fail("Failed to update session!");
         }
     }
 }
