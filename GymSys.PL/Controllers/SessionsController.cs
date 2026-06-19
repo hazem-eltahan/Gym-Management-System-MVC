@@ -57,5 +57,21 @@ namespace GymSys.PL.Controllers
             ViewBag.Trainers = new SelectList(await _sessionService.GetTrainerSelectListAsync(), "Id", "Name");
             ViewBag.Categories = new SelectList(await _sessionService.GetCategorySelectListAsync(), "Id", "CategoryName");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(int id, CancellationToken ct)
+        {
+            var result = await _sessionService.GetSessionByIdAsync(id, ct);
+            if (result.success)
+            {
+                return View(result.value);
+            }
+            else
+            {
+                TempData["FailMessage"] = result.error;
+                return RedirectToAction(nameof(Index));
+            }
+
+        }
     }
 }

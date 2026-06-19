@@ -61,6 +61,10 @@ namespace GymSys.BLL
 
             CreateMap<Trainer, TrainerSelectList>();
             CreateMap<Category, CategorySelectList>();
+
+            CreateMap<Session, SessionViewModel>()
+                .ForMember(dest => dest.TrainerName, opt => opt.MapFrom(src => src.Trainer.Name))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName));
         }
     }
 }

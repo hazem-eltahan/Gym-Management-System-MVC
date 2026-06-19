@@ -26,7 +26,7 @@ namespace GymSys.BLL.Services.Classes
 
         public async Task<Result> CreateSessionAsync(CreateSessionViewModel model, CancellationToken ct = default)
         {
-            if(model.StartDate >= model.EndDate) return Result.Validation("End date must be after Start date!");
+            if(model.StartDate >= model.EndDate) return Result.Validation("End date must be after start date!");
             if(model.StartDate <= DateTime.Now) return Result.Validation("Start date must be in the future!");
             if(model.Capacity < 1 ||  model.Capacity > 25) return Result.Validation("Capacity has to be between 1 and 25!");
 
@@ -75,6 +75,19 @@ namespace GymSys.BLL.Services.Classes
         {
             var categories = await _unitOfWork.GetRepository<Category>().GetAllAsync(ct:ct);
             return _mapper.Map<IEnumerable<CategorySelectList>>(categories);
+        }
+
+        public async Task<Result<SessionViewModel>> GetSessionByIdAsync(int id, CancellationToken ct = default)
+        {
+            var session = await _unitOfWork.SessionRepository.GetSessionByIdWithTrainerAndCategoryAsync(id, ct);
+            if (session == null)
+                return Result<SessionViewModel>.NotFound("Session not found!");
+            else
+            {
+                var sessionVM = _mapper.Map<Session, SessionViewModel>(session);
+                sessionVM.AvailableSlots = sessionVM.Capacity - await _unitOfWork.SessionRepository.GetCountOfBookedSlotsAsync(id, ct);
+                return Result<SessionViewModel>.OK(sessionVM);
+            }
         }
 
         public async Task<IEnumerable<TrainerSelectList>> GetTrainerSelectListAsync(CancellationToken ct = default)
