@@ -54,8 +54,16 @@ namespace GymSys.PL.Controllers
 
         public async Task PopulateTrainerAndCategorySelectList()
         {
-            ViewBag.Trainers = new SelectList(await _sessionService.GetTrainerSelectListAsync(), "Id", "Name");
-            ViewBag.Categories = new SelectList(await _sessionService.GetCategorySelectListAsync(), "Id", "CategoryName");
+            var categoriesList = await _sessionService.GetCategorySelectListAsync();
+            var trainersList = await _sessionService.GetTrainerSelectListAsync();
+            ViewBag.Trainers = new SelectList(trainersList.value, "Id", "Name");
+            ViewBag.Categories = new SelectList(categoriesList.value, "Id", "CategoryName");
+        }
+
+        public async Task PopulateTrainerSelectList()
+        {
+            var trainersList = await _sessionService.GetTrainerSelectListAsync();
+            ViewBag.Trainers = new SelectList(trainersList.value, "Id", "Name");
         }
 
         [HttpGet]
@@ -81,7 +89,7 @@ namespace GymSys.PL.Controllers
             var result = await _sessionService.GetSessionToUpdateAsync(id, ct);
             if (result.success)
             {
-                ViewBag.Trainers = new SelectList(await _sessionService.GetTrainerSelectListAsync(), "Id", "Name");
+                await PopulateTrainerSelectList();
                 return View(result.value);
             }
             else
@@ -96,7 +104,7 @@ namespace GymSys.PL.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Trainers = new SelectList(await _sessionService.GetTrainerSelectListAsync(), "Id", "Name");
+                await PopulateTrainerSelectList();
                 return View(model);
             }
 
@@ -109,7 +117,7 @@ namespace GymSys.PL.Controllers
             else
             {
                 TempData["FailMessage"] = result.error;
-                ViewBag.Trainers = new SelectList(await _sessionService.GetTrainerSelectListAsync(), "Id", "Name");
+                await PopulateTrainerSelectList();
                 return View(model);
             }
         }

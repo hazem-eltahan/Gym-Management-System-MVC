@@ -5,6 +5,23 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="Alert" class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+else if (TempData["FailMessage"] != null)
+{
+    <div id="Alert" class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        @TempData["FailMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="container mt-4">
     <header class="mb-4">
         <h3 class="text-primary-color">Edit Session</h3>
@@ -84,4 +101,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <partial name="_AlertBoxScript.cshtml" />
 }
+

@@ -71,10 +71,11 @@ namespace GymSys.BLL.Services.Classes
             return sessionVM;
         }
 
-        public async Task<IEnumerable<CategorySelectList>> GetCategorySelectListAsync(CancellationToken ct = default)
+        public async Task<Result<IEnumerable<CategorySelectList>>> GetCategorySelectListAsync(CancellationToken ct = default)
         {
             var categories = await _unitOfWork.GetRepository<Category>().GetAllAsync(ct: ct);
-            return _mapper.Map<IEnumerable<CategorySelectList>>(categories);
+            var categorySelectList = _mapper.Map<IEnumerable<CategorySelectList>>(categories);
+            return Result<IEnumerable<CategorySelectList>>.OK(categorySelectList);
         }
 
         public async Task<Result<SessionViewModel>> GetSessionByIdAsync(int id, CancellationToken ct = default)
@@ -89,10 +90,11 @@ namespace GymSys.BLL.Services.Classes
                 return Result<SessionViewModel>.OK(sessionVM);
             }
         }
-        public async Task<IEnumerable<TrainerSelectList>> GetTrainerSelectListAsync(CancellationToken ct = default)
+        public async Task<Result<IEnumerable<TrainerSelectList>>> GetTrainerSelectListAsync(CancellationToken ct = default)
         {
             var trainers = await _unitOfWork.GetRepository<Trainer>().GetAllAsync(ct: ct);
-            return _mapper.Map<IEnumerable<TrainerSelectList>>(trainers);
+            var trainerSelectList = _mapper.Map<IEnumerable<TrainerSelectList>>(trainers);
+            return Result<IEnumerable<TrainerSelectList>>.OK(trainerSelectList);
         }
 
         public async Task<Result<UpdateSessionViewModel>> GetSessionToUpdateAsync(int id, CancellationToken ct = default)
