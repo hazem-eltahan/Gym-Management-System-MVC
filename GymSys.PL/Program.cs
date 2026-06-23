@@ -2,16 +2,18 @@ using GymSys.BLL;
 using GymSys.BLL.Services.Classes;
 using GymSys.BLL.Services.Interfaces;
 using GymSys.DAL;
+using GymSys.DAL.Data.DataSeeding;
 using GymSys.DAL.Data.DbContexts;
 using GymSys.DAL.Repositories.Classes;
 using GymSys.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace GymSys.PL
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +36,8 @@ namespace GymSys.PL
             builder.Services.AddAutoMapper(m => m.AddProfile(new MappingProfile()));
 
             var app = builder.Build();
+
+            await app.DatabaseMigrationAndSeedingAsync();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
