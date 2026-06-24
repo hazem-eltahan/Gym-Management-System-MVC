@@ -30,6 +30,7 @@ namespace GymSys.DAL.Repositories.Classes
             return _dbSet.AsNoTracking().AnyAsync(predicate, ct);
         }
 
+
         public void Delete(TEntity entity)
         {
             _dbSet.Remove(entity);
@@ -55,6 +56,15 @@ namespace GymSys.DAL.Repositories.Classes
         public void Update(TEntity entity)
         {
             _dbSet.Update(entity);
+        }
+        public async Task<int> CountAsync(CancellationToken ct = default)
+        {
+            return await _dbSet.CountAsync();
+        }
+
+        public async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct = default)
+        {
+            return await _dbSet.CountAsync(predicate,ct);
         }
     }
 }
