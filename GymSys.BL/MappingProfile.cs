@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GymSys.BLL.ViewModels.MemberViewModels;
+using GymSys.BLL.ViewModels.PlanViewModels;
 using GymSys.BLL.ViewModels.SessionViewModels;
 using GymSys.BLL.ViewModels.TrainerViewModels;
 using GymSys.DAL.Data.Models;
@@ -21,6 +22,7 @@ namespace GymSys.BLL
 
             MapTrainer();
 
+            MapPlan();
         }
         
         private void MapMember()
@@ -101,6 +103,17 @@ namespace GymSys.BLL
                     dest.Address.City = src.City;
                     dest.Address.BuildingNumber = src.BuildingNumber;
                 });
+
+        }
+        private void MapPlan()
+        {
+            CreateMap<Plan, PlanViewModel>()
+                .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.DurationDays));
+
+            CreateMap<Plan, UpdatePlanViewModel>()
+                .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.DurationDays))
+                .ReverseMap();
+
 
         }
     }
