@@ -47,28 +47,19 @@ namespace GymSys.BLL.Services.Classes
             return result > 0 ? Result.OK() : Result.Fail("Failed to create session!");
         }
 
-        public async Task<IEnumerable<SessionViewModel>?> GetAllSessionsAsync(CancellationToken ct = default)
+        public async Task<Result<IEnumerable<SessionViewModel>?>> GetAllSessionsAsync(CancellationToken ct = default)
         {
             var sessions = await _unitOfWork.SessionRepository.GetAllSessionsWithTrainerAndCategory(ct);
-            if (sessions == null || !sessions.Any()) return null;
+            if (sessions == null || !sessions.Any()) return Result<IEnumerable<SessionViewModel>?>.NotFound("No sessions found!");
 
-            var sessionVM = sessions.Select(s => new SessionViewModel()
-            {
-                Id = s.Id,
-                Description = s.Description,
-                Capacity = s.Capacity,
-                StartDate = s.StartDate,
-                EndDate = s.EndDate,
-                TrainerName = s.Trainer.Name,
-                CategoryName = s.Category.CategoryName,
-            });
+            var sessionsVM = _mapper.Map<IEnumerable<SessionViewModel>>(sessions);
 
-            foreach (var session in sessionVM)
+            foreach (var session in sessionsVM)
             {
                 session.AvailableSlots = session.Capacity - await _unitOfWork.SessionRepository.GetCountOfBookedSlotsAsync(session.Id, ct);
             }
 
-            return sessionVM;
+            return Result<IEnumerable<SessionViewModel>?>.OK(sessionsVM);
         }
 
         public async Task<Result<IEnumerable<CategorySelectList>>> GetCategorySelectListAsync(CancellationToken ct = default)

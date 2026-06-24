@@ -11,7 +11,7 @@ namespace GymSys.BLL.Services.Interfaces
 {
     public interface ISessionService
     {
-        Task<IEnumerable<SessionViewModel>?> GetAllSessionsAsync(CancellationToken ct = default);
+        Task<Result<IEnumerable<SessionViewModel>?>> GetAllSessionsAsync(CancellationToken ct = default);
         Task<Result> CreateSessionAsync(CreateSessionViewModel model, CancellationToken ct = default);
         Task<Result<IEnumerable<TrainerSelectList>>> GetTrainerSelectListAsync(CancellationToken ct = default);
         Task<Result<IEnumerable<CategorySelectList>>> GetCategorySelectListAsync(CancellationToken ct = default);

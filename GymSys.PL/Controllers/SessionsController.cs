@@ -16,8 +16,8 @@ namespace GymSys.PL.Controllers
         }
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var sessions = await _sessionService.GetAllSessionsAsync(ct);
-            return View(sessions);
+            var result = await _sessionService.GetAllSessionsAsync(ct);
+            return View(result.value);
         }
 
         #region Create
