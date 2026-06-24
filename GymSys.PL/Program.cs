@@ -1,4 +1,5 @@
 using GymSys.BLL;
+using GymSys.BLL.Services.Attachment;
 using GymSys.BLL.Services.Classes;
 using GymSys.BLL.Services.Interfaces;
 using GymSys.DAL;
@@ -33,6 +34,7 @@ namespace GymSys.PL
             builder.Services.AddScoped<ISessionRepository, SessionRepository>();
             builder.Services.AddScoped<ISessionService, SessionService>();
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+            builder.Services.AddScoped<IAttachmentService, AttachmentService>();
 
             builder.Services.AddAutoMapper(m => m.AddProfile(new MappingProfile()));
 
