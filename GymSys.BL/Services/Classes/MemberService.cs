@@ -50,6 +50,7 @@ namespace GymSys.BLL.Services.Classes
             else
             {
                 //Delete uploaded photo
+                _attachmentService.Delete("MembersPhotos", storedPhotoName.value);
                 return Result.Fail("Failed to create member!");
             }
         }
@@ -130,6 +131,7 @@ namespace GymSys.BLL.Services.Classes
 
             _unitOfWork.GetRepository<Member>().Delete(member);
             var result = await _unitOfWork.SaveChangesAsync(ct);
+            _attachmentService.Delete("MembersPhotos", member.Phone);
             return result > 0 ? Result.OK() : Result.Fail("Failed to delete member!");
         }
     }

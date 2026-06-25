@@ -21,11 +21,48 @@ namespace GymSys.BLL.Services.Attachment
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
         }
+
+        public Result Delete(string folderName, string fileName)
+        {
+            var filePath = Path.Combine(_webHostEnvironment.ContentRootPath, folderName, fileName);
+            try
+            {
+                if (!File.Exists(filePath)) return Result.NotFound("File not found!");
+                File.Delete(filePath);
+                return Result.OK();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to delete file {fileName}");
+                return Result.Fail("Failed to delete file!");
+            }
+        }
+
+        public Result<(Stream stream, string contentType)?> GetFile(string folderName, string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(folderName) || string.IsNullOrWhiteSpace(fileName))
+                return Result<(Stream stream, string contentType)?>.NotFound("File name or folder name is missing!");
+
+            var filePath = Path.Combine(_webHostEnvironment.ContentRootPath, folderName, fileName);
+            if (!File.Exists(filePath)) return Result<(Stream stream, string contentType)?>.NotFound("File not found!");
+
+            var openStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            var extension = Path.GetExtension(filePath).ToLower();
+            var contentType = extension switch
+            {
+                ".png" => "image/png",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                _ => "application/octet-stream"
+            };
+
+            return Result<(Stream stream, string contentType)?>.OK((openStream, contentType));
+        }
+
         public async Task<Result<string?>> UploadAsync(Stream fileStream, string folderName, string fileName, CancellationToken ct = default)
         {
             if (fileStream == null) return Result<string?>.Fail("No file stream!");
-            if(!fileStream.CanRead) return Result<string?>.Fail("Cannot read from this file stream!");
-            if(fileStream.Length == 0) return Result<string?>.Fail("Empty file stream!");
+            if (!fileStream.CanRead) return Result<string?>.Fail("Cannot read from this file stream!");
+            if (fileStream.Length == 0) return Result<string?>.Fail("Empty file stream!");
 
             if (fileStream.Length > _maxFileSize)
             {
@@ -34,7 +71,7 @@ namespace GymSys.BLL.Services.Attachment
             }
 
             var extension = Path.GetExtension(fileName);
-            if(string.IsNullOrWhiteSpace(extension) || !_allowedExtensions.Contains(extension))
+            if (string.IsNullOrWhiteSpace(extension) || !_allowedExtensions.Contains(extension))
             {
                 _logger.LogError($"File rejected, Extension {extension} not allowed!");
                 return Result<string?>.Validation("File extension not allowed!");
