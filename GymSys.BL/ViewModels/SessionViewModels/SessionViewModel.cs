@@ -19,7 +19,7 @@ namespace GymSys.BLL.ViewModels.SessionViewModels
 
         //Computed
         public string DateDisplay => $"{StartDate:MM dd, yyyy}";
-        public string TimeRangeDisplay => $"{EndDate:hh:mm tt} - {StartDate:hh:mm tt}";
+        public string TimeRangeDisplay => $"{StartDate:hh:mm tt} - {EndDate:hh:mm tt}";
         public TimeSpan Duration => EndDate - StartDate;
         public string Status
         {

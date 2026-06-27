@@ -1,4 +1,5 @@
-﻿using GymSys.BLL.ViewModels.TrainerViewModels;
+﻿using GymSys.BLL.Common;
+using GymSys.BLL.ViewModels.TrainerViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,11 @@ namespace GymSys.BLL.Services.Interfaces
 {
     public interface ITrainerService
     {
-        Task<IEnumerable<TrainerViewModel>> GetAllTrainersAsync(CancellationToken ct = default);
-        Task<bool> CreateTrainerAsync(CreateTrainerViewModel model, CancellationToken ct = default);
-        Task<TrainerDetailsViewModel?> GetTrainerDetailsAsync(int id, CancellationToken ct = default);
-        Task<UpdateTrainerViewModel?> GetTrainerToUpdateAsync(int id, CancellationToken ct = default);
-        Task<bool> UpdateTrainerAsync(int id, UpdateTrainerViewModel model, CancellationToken ct = default);
-        Task<bool> DeleteTrainerAsync(int id, CancellationToken ct);
+        Task<Result<IEnumerable<TrainerViewModel>>> GetAllTrainersAsync(CancellationToken ct = default);
+        Task<Result> CreateTrainerAsync(CreateTrainerViewModel model, CancellationToken ct = default);
+        Task<Result<TrainerDetailsViewModel?>> GetTrainerDetailsAsync(int id, CancellationToken ct = default);
+        Task<Result<UpdateTrainerViewModel?>> GetTrainerToUpdateAsync(int id, CancellationToken ct = default);
+        Task<Result> UpdateTrainerAsync(int id, UpdateTrainerViewModel model, CancellationToken ct = default);
+        Task<Result> DeleteTrainerAsync(int id, CancellationToken ct);
     }
 }

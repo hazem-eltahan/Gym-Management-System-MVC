@@ -1,4 +1,6 @@
-﻿using GymSys.BLL.Services.Interfaces;
+﻿using AutoMapper;
+using GymSys.BLL.Common;
+using GymSys.BLL.Services.Interfaces;
 using GymSys.BLL.ViewModels.TrainerViewModels;
 using GymSys.DAL.Data.Models;
 using GymSys.DAL.Repositories.Interfaces;
@@ -13,125 +15,84 @@ namespace GymSys.BLL.Services.Classes
     public class TrainerService : ITrainerService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public TrainerService(IUnitOfWork unitOfWork)
+        public TrainerService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public async Task<bool> CreateTrainerAsync(CreateTrainerViewModel model, CancellationToken ct = default)
+        public async Task<Result> CreateTrainerAsync(CreateTrainerViewModel model, CancellationToken ct = default)
         {
             var emailExist = await _unitOfWork.GetRepository<Trainer>().AnyAsync(x => x.Email == model.Email, ct);
             var phoneExist = await _unitOfWork.GetRepository<Trainer>().AnyAsync(x => x.Phone == model.Phone, ct);
 
-            if (emailExist || phoneExist) return false;
+            if (emailExist || phoneExist) return Result.Validation("Trainer with this data already exists!");
 
-            var trainer = new Trainer()
-            {
-                Name = model.Name,
-                Email = model.Email,
-                Phone = model.Phone,
-                DateOfBirth = model.DateOfBirth,
-                Gender = model.Gender,
-                Address = new Address()
-                {
-                    Street = model.Street,
-                    City = model.City,
-                    BuildingNumber = model.BuildingNumber
-                },
-                Speciality = model.Specialties
-            };
-           _unitOfWork.GetRepository<Trainer>().Add(trainer);
+            var mappedTrainer = _mapper.Map<Trainer>(model);
+           _unitOfWork.GetRepository<Trainer>().Add(mappedTrainer);
             var result = await _unitOfWork.SaveChangesAsync(ct);
-            return result > 0;
+            return result > 0 ? Result.OK() : Result.Fail("Failed to create trainer!");
         }
 
-        public async Task<bool> DeleteTrainerAsync(int id, CancellationToken ct)
+        public async Task<Result> DeleteTrainerAsync(int id, CancellationToken ct)
         {
             var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(id, ct);
-            if (trainer == null) return false;
+            if (trainer == null) return Result.NotFound("Trainer not found!");
 
             var activeSessions = await _unitOfWork.GetRepository<Session>().AnyAsync(s=>s.TrainerId == id && s.StartDate >  DateTime.Now, ct);
-            if (activeSessions) return false;
+            if (activeSessions) return Result.Fail("Can't delete trainer with active session!");
 
             _unitOfWork.GetRepository<Trainer>().Delete(trainer);
             var result = await _unitOfWork.SaveChangesAsync(ct);
-            return result > 0;
+            return result > 0 ? Result.OK() : Result.Fail("Failed to delete trainer!");
         }
 
-        public async Task<IEnumerable<TrainerViewModel>> GetAllTrainersAsync(CancellationToken ct = default)
+        public async Task<Result<IEnumerable<TrainerViewModel>>> GetAllTrainersAsync(CancellationToken ct = default)
         {
             var trainers = await _unitOfWork.GetRepository<Trainer>().GetAllAsync(ct: ct);
-            if (!trainers.Any()) return [];
+            if (!trainers.Any()) return Result<IEnumerable<TrainerViewModel>>.NotFound("Trainers not found!");
 
-            var trainersVM = trainers.Select(t => new TrainerViewModel()
-            {
-                Id = t.Id,
-                Name = t.Name,
-                Email = t.Email,
-                Phone = t.Phone,
-                Specialization = t.Speciality.ToString()
-            });
-            return trainersVM;
+            var mappedTrainers = _mapper.Map<IEnumerable<TrainerViewModel>>(trainers);
+            return Result<IEnumerable<TrainerViewModel>>.OK(mappedTrainers);
         }
 
-        public async Task<TrainerDetailsViewModel?> GetTrainerDetailsAsync(int id, CancellationToken ct = default)
+        public async Task<Result<TrainerDetailsViewModel?>> GetTrainerDetailsAsync(int id, CancellationToken ct = default)
         {
             var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(id, ct);
-            if (trainer == null) return null;
+            if (trainer == null) return Result<TrainerDetailsViewModel?>.NotFound("Trainer not found!");
 
-            var trainerVM = new TrainerDetailsViewModel()
-            {
-                Name = trainer.Name,
-                Email = trainer.Email,
-                Phone = trainer.Phone,
-                DateOfBirth = trainer.DateOfBirth.ToString(),
-                Address = $"{trainer.Address.BuildingNumber} - {trainer.Address.Street} - {trainer.Address.City}",
-                Specialization = trainer.Speciality.ToString()
-            };
-            return trainerVM;
+            var mappedTrainer = _mapper.Map<TrainerDetailsViewModel>(trainer);
+            return Result<TrainerDetailsViewModel?>.OK(mappedTrainer);
         }
 
-        public async Task<UpdateTrainerViewModel?> GetTrainerToUpdateAsync(int id, CancellationToken ct = default)
+        public async Task<Result<UpdateTrainerViewModel?>> GetTrainerToUpdateAsync(int id, CancellationToken ct = default)
         {
             var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(id, ct);
-            if (trainer == null) return null;
+            if (trainer == null) return Result<UpdateTrainerViewModel?>.NotFound("Trainer not found!");
 
-            var trainerVM = new UpdateTrainerViewModel()
-            {
-                Name = trainer.Name,
-                Email = trainer.Email,
-                Phone = trainer.Phone,
-                BuildingNumber = trainer.Address.BuildingNumber,
-                Street = trainer.Address.Street,
-                City = trainer.Address.City,
-                Speciality = trainer.Speciality
-            };
+            var mappedTrainer = _mapper.Map<UpdateTrainerViewModel>(trainer);
 
-            return trainerVM;
+            return Result<UpdateTrainerViewModel?>.OK(mappedTrainer);
         }
 
-        public async Task<bool> UpdateTrainerAsync(int id, UpdateTrainerViewModel model, CancellationToken ct = default)
+        public async Task<Result> UpdateTrainerAsync(int id, UpdateTrainerViewModel model, CancellationToken ct = default)
         {
             var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIdAsync(id, ct);
-            if (trainer == null) return false;
+            if (trainer == null) return Result.NotFound("Trainer not found!");
 
             var emailExist = await _unitOfWork.GetRepository<Trainer>().AnyAsync(x => x.Email == model.Email && x.Id != id, ct);
             var phoneExist = await _unitOfWork.GetRepository<Trainer>().AnyAsync(x => x.Phone == model.Phone && x.Id != id, ct);
 
-            if(emailExist || phoneExist) return false;
+            if (emailExist || phoneExist) return Result.Fail("Trainer with this data exists!");
 
-            trainer.Email = model.Email;
-            trainer.Phone = model.Phone;
-            trainer.Address.BuildingNumber = model.BuildingNumber;
-            trainer.Address.City = model.City;
-            trainer.Address.Street = model.Street;
-            trainer.Speciality = model.Speciality;
+            _mapper.Map(model, trainer);
             trainer.UpdatedAt = DateTime.Now;
 
             _unitOfWork.GetRepository<Trainer>().Update(trainer);
             var result = await _unitOfWork.SaveChangesAsync(ct);
-            return result > 0;
+            return result > 0 ? Result.OK() : Result.Fail("Failed to update trainer!");
         }
     }
 }

@@ -17,34 +17,34 @@ namespace GymSys.PL.Controllers
         }
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var plans = await _planService.GetAllPlansAsync(ct);
-            return View(plans);
+            var result = await _planService.GetAllPlansAsync(ct);
+            return View(result.value);
         }
         [HttpGet]
         public async Task<IActionResult> Details(int id, CancellationToken ct)
         {
-            var plan = await _planService.GetPlanDetailsByIdAsync(id, ct);
-            if (plan is null)
+            var result = await _planService.GetPlanDetailsByIdAsync(id, ct);
+            if (!result.success)
             {
-                TempData["FailMessage"] = "Plan not found!";
+                TempData["FailMessage"] = result.error;
                 return RedirectToAction(nameof(Index));
             }
-            return View(plan);
+            return View(result.value);
         }
 
         #region Edit
         [HttpGet]
         public async Task<IActionResult> Edit(int id, CancellationToken ct)
         {
-            var plan = await _planService.GetPlanToUpdateAsync(id,ct);
-            if (plan is null)
+            var result = await _planService.GetPlanToUpdateAsync(id,ct);
+            if (!result.success)
             {
-                TempData["FailMessage"] = "Plan can't be edited! : Not found, Inactive or has active memberships.";
+                TempData["FailMessage"] = result.error;
 
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(plan);
+            return View(result.value);
         }
 
         [HttpPost]
@@ -54,10 +54,10 @@ namespace GymSys.PL.Controllers
 
             var result = await _planService.UpdatePlanAsync(id,model,ct);
 
-            if (result)
+            if (result.success)
                 TempData["SuccessMessage"] = "Plan updated successfully!";
             else
-                TempData["FailMessage"] = "Update plan failed!";
+                TempData["FailMessage"] = result.error;
             return RedirectToAction(nameof(Index));
         }
         #endregion
@@ -67,10 +67,10 @@ namespace GymSys.PL.Controllers
         {
             var result = await _planService.ToggleActivationAsync(id,ct);
 
-            if (result)
+            if (result.success)
                 TempData["SuccessMessage"] = "Plan status changed!";
             else
-                TempData["FailMessage"] = "Failed to change plan status!";
+                TempData["FailMessage"] = result.error;
 
             return RedirectToAction(nameof(Index));
         }

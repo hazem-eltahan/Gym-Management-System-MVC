@@ -21,34 +21,34 @@ namespace GymSys.PL.Controllers
         //Index() - Displays member listing page
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var members = await _memberService.GetAllMembersAsync(ct);
-            return View(members);
+            var result = await _memberService.GetAllMembersAsync(ct);
+            return View(result.value);
         }
 
         //MemberDetails(int id) - Displays member profile page
         public async Task<IActionResult> MemberDetails(int id, CancellationToken ct)
         {
-            var member = await _memberService.GetMemberDetailsByIdAsync(id, ct);
+            var result = await _memberService.GetMemberDetailsByIdAsync(id, ct);
 
-            if (member is null)
+            if (!result.success)
             {
-                TempData["FailMessage"] = "Member not found!";
+                TempData["FailMessage"] = result.error;
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(member);
+            return View(result.value);
         }
         //HealthRecordDetails(int id) - Shows health record page
         public async Task<IActionResult> HealthRecordDetails(int id, CancellationToken ct)
         {
-            var healthRecordDetails = await _memberService.GetMemberHealthRecordAsync(id, ct);
+            var result = await _memberService.GetMemberHealthRecordAsync(id, ct);
 
-            if (healthRecordDetails == null)
+            if (!result.success)
             {
-                TempData["FailMessage"] = "Health Record not found!";
+                TempData["FailMessage"] = result.error;
                 return RedirectToAction(nameof(Index));
             }
-            return View(healthRecordDetails);
+            return View(result.value);
         }
 
         #region Create
@@ -65,10 +65,10 @@ namespace GymSys.PL.Controllers
 
             var result = await _memberService.CreateMemberAsync(model, ct);
 
-            if (result)
+            if (result.success)
                 TempData["SuccessMessage"] = "Member created successfully!";
             else
-                TempData["FailMessage"] = "Failed to create member!";
+                TempData["FailMessage"] = result.error;
 
             return RedirectToAction(nameof(Index));
         }
@@ -79,13 +79,13 @@ namespace GymSys.PL.Controllers
         [HttpGet]
         public async Task<IActionResult> EditMember(int id, CancellationToken ct)
         {
-            var member = await _memberService.GetMemberToUpdateAsync(id, ct);
-            if (member == null)
+            var result = await _memberService.GetMemberToUpdateAsync(id, ct);
+            if (!result.success)
             {
-                TempData["FailMessage"] = "Member not found!";
+                TempData["FailMessage"] = result.error;
                 return RedirectToAction(nameof(Index));
             }
-            return View(member);
+            return View(result.value);
         }
 
         //POST Edit(member) - Submits form
@@ -95,10 +95,10 @@ namespace GymSys.PL.Controllers
             if (!ModelState.IsValid) return View(model);
 
             var result = await _memberService.UpdateMemberDetailsAsync(id, model, ct);
-            if (result)
+            if (result.success)
                 TempData["SuccessMessage"] = "Member updated successfully!";
             else
-                TempData["FailMessage"] = "Failed to update member!";
+                TempData["FailMessage"] = result.error;
 
             return RedirectToAction(nameof(Index));
         }
@@ -109,10 +109,10 @@ namespace GymSys.PL.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
-            var member = await _memberService.GetMemberDetailsByIdAsync(id, ct);
-            if(member == null)
+            var result = await _memberService.GetMemberDetailsByIdAsync(id, ct);
+            if(!result.success)
             {
-                TempData["FailMessage"] = "Member not found!";
+                TempData["FailMessage"] = result.error;
                 return RedirectToAction(nameof(Index));
             }
             return View();
@@ -124,10 +124,10 @@ namespace GymSys.PL.Controllers
         {
             var result = await _memberService.DeleteMemberAsync(id, ct);
 
-            if (result)
+            if (result.success)
                 TempData["SuccessMessage"] = "Member deleted successfully!";
             else
-                TempData["FailMessage"] = "Failed to delete member!";
+                TempData["FailMessage"] = result.error;
             return RedirectToAction(nameof(Index));
         }
         #endregion
