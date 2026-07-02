@@ -1,5 +1,6 @@
 ﻿using GymSys.BLL.ViewModels.AccountViewModels;
 using GymSys.DAL.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace GymSys.PL.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model, CancellationToken ct)
         {
-            if(!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) return View(model);
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
@@ -56,6 +57,14 @@ namespace GymSys.PL.Controllers
                 ModelState.AddModelError("InvalidLogin", "Invalid email or password!");
                 return View(model);
             }
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction(nameof(Login));
         }
     }
 }
