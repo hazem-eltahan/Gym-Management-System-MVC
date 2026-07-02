@@ -3,6 +3,7 @@ using GymSys.BLL.Services.Interfaces;
 using GymSys.BLL.ViewModels.MemberViewModels;
 using GymSys.DAL.Data.Models;
 using GymSys.DAL.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Reflection;
@@ -11,6 +12,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GymSys.PL.Controllers
 {
+    [Authorize(Roles = "SuperAdmin")]
     public class MembersController : Controller
     {
         private readonly IMemberService _memberService;

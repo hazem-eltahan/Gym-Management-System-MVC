@@ -32,7 +32,7 @@ namespace GymSys.DAL.Data.DataSeeding
 
                 foreach (var role in roles)
                 {
-                    if (!await roleManager.RoleExistsAsync(role.Name))
+                    if (!await roleManager.RoleExistsAsync(role.Name!))
                     {
                         var roleResult = await roleManager.CreateAsync(role);
                         if (!roleResult.Succeeded)
