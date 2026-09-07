@@ -1,22 +1,55 @@
-﻿using GymSys.BLL.Services.Interfaces;
+﻿using GymSys.BLL.Services.Attachment;
+using GymSys.BLL.Services.Interfaces;
 using GymSys.BLL.ViewModels.MemberViewModels;
 using GymSys.DAL.Data.Models;
 using GymSys.DAL.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Reflection;
+using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GymSys.PL.Controllers
 {
+    [Authorize(Roles = "SuperAdmin")]
     public class MembersController : Controller
     {
         private readonly IMemberService _memberService;
+        private readonly IAttachmentService _attachmentService;
 
-        public MembersController(IMemberService memberService)
+        public MembersController(IMemberService memberService, IAttachmentService attachmentService)
         {
             _memberService = memberService;
+            _attachmentService = attachmentService;
         }
+
+        #region Get Member Photo
+        [HttpGet]
+        public async Task<IActionResult> Picture(int id, CancellationToken ct)
+        {
+            var memberResult = await _memberService.GetMemberDetailsByIdAsync(id, ct);
+
+            if (!memberResult.success)
+            {
+                TempData["FailMessage"] = memberResult.error;
+                return NotFound();
+            }
+
+            if (string.IsNullOrWhiteSpace(memberResult.value!.Photo))
+                return NotFound();
+
+            var fileResult = _attachmentService.GetFile("MembersPhotos", memberResult.value.Photo);
+
+            if (!fileResult.success)
+            {
+                TempData["FailMessage"] = fileResult.error;
+                return NotFound();
+            }
+
+            return File(fileResult.value!.Value.stream, fileResult.value.Value.contentType);
+        } 
+        #endregion
 
         //Index() - Displays member listing page
         public async Task<IActionResult> Index(CancellationToken ct)
@@ -110,7 +143,7 @@ namespace GymSys.PL.Controllers
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
             var result = await _memberService.GetMemberDetailsByIdAsync(id, ct);
-            if(!result.success)
+            if (!result.success)
             {
                 TempData["FailMessage"] = result.error;
                 return RedirectToAction(nameof(Index));
@@ -120,7 +153,7 @@ namespace GymSys.PL.Controllers
 
         //POST DeleteConfirmed(int id) - Processes deletion 
         [HttpPost]
-        public async Task<IActionResult> DeleteConfirmed([FromRoute]int id, CancellationToken ct)
+        public async Task<IActionResult> DeleteConfirmed([FromRoute] int id, CancellationToken ct)
         {
             var result = await _memberService.DeleteMemberAsync(id, ct);
 

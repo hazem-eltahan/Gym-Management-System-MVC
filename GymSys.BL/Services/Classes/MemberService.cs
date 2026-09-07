@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GymSys.BLL.Common;
+using GymSys.BLL.Services.Attachment;
 using GymSys.BLL.Services.Interfaces;
 using GymSys.BLL.ViewModels.MemberViewModels;
 using GymSys.DAL.Data.DbContexts;
@@ -17,11 +18,13 @@ namespace GymSys.BLL.Services.Classes
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IAttachmentService _attachmentService;
 
-        public MemberService(IUnitOfWork unitOfWork, IMapper mapper)
+        public MemberService(IUnitOfWork unitOfWork, IMapper mapper, IAttachmentService attachmentService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _attachmentService = attachmentService;
         }
 
         public async Task<Result> CreateMemberAsync(CreateMemberViewModel model, CancellationToken ct = default)
@@ -31,10 +34,25 @@ namespace GymSys.BLL.Services.Classes
 
             if (emailExist || phoneExist) return Result.NotFound("Member with this data already exists!");
 
+            //Upload Photo
+            var storedPhotoName = await _attachmentService.UploadAsync(model.PhotoFile.OpenReadStream(), "MembersPhotos", model.PhotoFile.FileName, ct);
+            if (string.IsNullOrWhiteSpace(storedPhotoName.value)) return Result.Fail("Uploaded photo invalid!");
+
+
             var member = _mapper.Map<Member>(model);
+            member.Photo = storedPhotoName.value;
             _unitOfWork.GetRepository<Member>().Add(member);
             var result = await _unitOfWork.SaveChangesAsync(ct);
-            return result > 0 ? Result.OK() : Result.Fail("Failed to create member!");
+            if (result > 0)
+            {
+                return Result.OK();
+            }
+            else
+            {
+                //Delete uploaded photo
+                _attachmentService.Delete("MembersPhotos", storedPhotoName.value);
+                return Result.Fail("Failed to create member!");
+            }
         }
 
         public async Task<Result<IEnumerable<MemberViewModel>>> GetAllMembersAsync(CancellationToken ct = default)
@@ -42,7 +60,7 @@ namespace GymSys.BLL.Services.Classes
             var members = await _unitOfWork.GetRepository<Member>().GetAllAsync(ct: ct);
             if (!members.Any()) return Result<IEnumerable<MemberViewModel>>.NotFound("Members not found!");
 
-            var mappedMembers = _mapper.Map<IEnumerable<Member>, IEnumerable<MemberViewModel>> (members);
+            var mappedMembers = _mapper.Map<IEnumerable<Member>, IEnumerable<MemberViewModel>>(members);
             return Result<IEnumerable<MemberViewModel>>.OK(mappedMembers);
         }
 
@@ -51,7 +69,7 @@ namespace GymSys.BLL.Services.Classes
             var healthRecord = await _unitOfWork.GetRepository<HealthRecord>().FirstOrDefaultAsync(x => x.Id == id, ct: ct);
             if (healthRecord == null) return Result<HealthRecordViewModel?>.NotFound("Health record not found!");
 
-            var mappedHealthRecord = _mapper.Map<HealthRecord, HealthRecordViewModel> (healthRecord);
+            var mappedHealthRecord = _mapper.Map<HealthRecord, HealthRecordViewModel>(healthRecord);
             return Result<HealthRecordViewModel?>.OK(mappedHealthRecord);
         }
 
@@ -87,13 +105,13 @@ namespace GymSys.BLL.Services.Classes
 
         public async Task<Result> UpdateMemberDetailsAsync(int id, MemberToUpdateViewModel model, CancellationToken ct = default)
         {
-            var member =await _unitOfWork.GetRepository<Member>().GetByIdAsync(id,ct);
+            var member = await _unitOfWork.GetRepository<Member>().GetByIdAsync(id, ct);
             if (member == null) return Result.NotFound("Member not found!");
 
-            var emailExist = await _unitOfWork.GetRepository<Member>().AnyAsync(e=>e.Email == model.Email && e.Id != id);
-            var phoneExist = await _unitOfWork.GetRepository<Member>().AnyAsync(e=>e.Phone == model.Phone && e.Id != id);
+            var emailExist = await _unitOfWork.GetRepository<Member>().AnyAsync(e => e.Email == model.Email && e.Id != id);
+            var phoneExist = await _unitOfWork.GetRepository<Member>().AnyAsync(e => e.Phone == model.Phone && e.Id != id);
 
-            if(emailExist || phoneExist) return Result.Fail("Member with this data already exists!");
+            if (emailExist || phoneExist) return Result.Fail("Member with this data already exists!");
 
             _mapper.Map(model, member);
             member.UpdatedAt = DateTime.Now;
@@ -108,11 +126,12 @@ namespace GymSys.BLL.Services.Classes
             var member = await _unitOfWork.GetRepository<Member>().GetByIdAsync(id, ct);
             if (member == null) return Result.NotFound("Member not found!");
 
-            var existingBooking = await _unitOfWork.GetRepository<Booking>().AnyAsync(b=>b.MemberId == id && b.Session.StartDate > DateTime.Now, ct);
-            if(existingBooking) return Result.Validation("Can not delete member with existing bookings!");
+            var existingBooking = await _unitOfWork.GetRepository<Booking>().AnyAsync(b => b.MemberId == id && b.Session.StartDate > DateTime.Now, ct);
+            if (existingBooking) return Result.Validation("Can not delete member with existing bookings!");
 
             _unitOfWork.GetRepository<Member>().Delete(member);
             var result = await _unitOfWork.SaveChangesAsync(ct);
+            _attachmentService.Delete("MembersPhotos", member.Phone);
             return result > 0 ? Result.OK() : Result.Fail("Failed to delete member!");
         }
     }

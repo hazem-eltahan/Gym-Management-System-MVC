@@ -2,10 +2,12 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using GymSys.BLL.Services.Interfaces;
 using GymSys.PL.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymSys.PL.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
