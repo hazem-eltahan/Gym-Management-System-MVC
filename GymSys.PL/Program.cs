@@ -1,15 +1,54 @@
+using GymSys.BLL;
+using GymSys.BLL.Services.Attachment;
+using GymSys.BLL.Services.Classes;
+using GymSys.BLL.Services.Interfaces;
+using GymSys.DAL;
+using GymSys.DAL.Data.DataSeeding;
+using GymSys.DAL.Data.DbContexts;
+using GymSys.DAL.Data.Models;
+using GymSys.DAL.Repositories.Classes;
+using GymSys.DAL.Repositories.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+
 namespace GymSys.PL
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<GymDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+            builder.Services.AddScoped<IMemberService, MemberService>();
+            builder.Services.AddScoped<IPlanService, PlanService>();
+            builder.Services.AddScoped<ITrainerService, TrainerService>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+            builder.Services.AddScoped<ISessionService, SessionService>();
+            builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+            builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+            builder.Services.AddAutoMapper(m => m.AddProfile(new MappingProfile()));
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(config =>
+            {
+                config.User.RequireUniqueEmail = true;
+                config.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
+                config.Lockout.MaxFailedAccessAttempts = 5;
+            })
+                .AddEntityFrameworkStores<GymDbContext>();
 
             var app = builder.Build();
+
+            await app.DatabaseMigrationAndSeedingAsync();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -22,12 +61,13 @@ namespace GymSys.PL
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
+                pattern: "{controller=Account}/{action=Login}/{id?}")
                 .WithStaticAssets();
 
             app.Run();

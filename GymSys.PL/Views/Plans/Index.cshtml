@@ -1,4 +1,8 @@
-﻿@model IEnumerable<Plan>
+﻿@model IEnumerable<PlanViewModel>
+
+@{
+	ViewData["Title"] = "Plans";
+}
 
 @if (TempData["SuccessMessage"] is not null)
 {
@@ -9,11 +13,11 @@
 	</div>
 }
 
-@if (TempData["ErrorMessage"] is not null)
+@if (TempData["FailMessage"] is not null)
 {
 	<div id="Alert" class="alert alert-danger alert-dismissible fade show">
 		<i class="bi bi-exclamation-triangle-fill me-2"></i>
-		@TempData["ErrorMessage"]
+		@TempData["FailMessage"]
 		<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 	</div>
 }
@@ -38,14 +42,14 @@
 						</div>
 						<div class="card-body d-flex flex-column">
 							<div class="text-center mb-4">
-								<div class="display-4 fw-bold text-primary-color">1,000</div>
-								<small class="text-muted">@plan.Price</small>
+								<div class="display-4 fw-bold text-primary-color">@plan.Price</div>
+								<small class="text-muted">EGP</small>
 							</div>
 
 							<div class="mb-3">
 								<p class="text-muted mb-2">
 									<i class="bi bi-calendar-check text-primary-color me-2"></i>
-									<strong>Duration:</strong> @plan.DurationDays Days
+									<strong>Duration:</strong> @plan.Duration Days
 								</p>
 								<p class="text-muted mb-3">
 									<i class="bi bi-file-text text-primary-color me-2"></i>
@@ -56,29 +60,29 @@
 
 							<div class="mt-auto">
 								<div class="d-grid gap-2">
-									<a asp-action="Details" asp-route-id="@plan.Id" class="btn btn-outline btn-sm">
+									<a asp-controller="Plans" asp-action="Details" asp-route-id="@plan.Id" class="btn btn-outline btn-sm">
 										<i class="bi bi-eye me-1"></i>View Details
 									</a>
 									<div class="d-flex gap-2">
-										<a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-outline btn-sm flex-fill">
+										<a asp-controller="Plans" asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-outline btn-sm flex-fill">
 											<i class="bi bi-pencil me-1"></i>Edit
 										</a>
-										<form method="post" class="flex-fill">
+										<form asp-controller="Plans" asp-action="Activate" asp-route-id="@plan.Id" method="post" class="flex-fill">
 
-											@if (plan.IsActive)
-											{
-												<button type="submit" class="btn btn-outline btn-sm w-100  text-danger">
+											<button type="submit" class="btn btn-outline btn-sm w-100  @(plan.IsActive ? "text-danger" : "text-success")">
+												@if (plan.IsActive)
+												{
 
 													<i class="bi bi-x-circle me-1"> Deactivate </i>
-												</button>
-											}
-											else
-											{
-											<button type="submit" class="btn btn-outline btn-sm w-100  text-success">
 
-												<i class="bi bi-check-circle me-1"> Activate </i>
+												}
+												else
+												{
+
+
+													<i class="bi bi-check-circle me-1"> Activate </i>
+												}
 											</button>
-											}
 										</form>
 									</div>
 								</div>
